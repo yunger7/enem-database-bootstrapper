@@ -1,0 +1,17 @@
+{
+    "name": "enem-database-bootstrapper",
+    "version": "0.1.0",
+    "description": "",
+    "author": "",
+    "main": "./src/index.js",
+    "keywords": [],
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "start": "node ./src/index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.10.1"
+    }
+}
