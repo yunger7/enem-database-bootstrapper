@@ -38,7 +38,7 @@ async function main() {
 
     for (let i = 0; i < exams.length; i++) {
         const exam = exams[i];
-        
+
         stream.write(`INSERT INTO enem_exams.exams (title, year) VALUES ('${exam.title}', ${exam.year});\n\n`);
 
         console.log(`[${i + 1}/${exams.length}]: Fetching exam details for "${exam.title}"`);
@@ -50,15 +50,14 @@ async function main() {
         for (const question of questions) {
             stream.write(`
                 INSERT INTO enem_exams.questions (
-                    title, 
-                    year, 
-                    question_number, 
-                    discipline, 
-                    language, 
-                    context, 
-                    files, 
-                    correct_alternative, 
-                    alternatives
+                    title,
+                    year,
+                    question_number,
+                    discipline,
+                    language,
+                    context,
+                    files,
+                    correct_alternative
                 ) 
                 VALUES (
                     ${sqlValueOrNull(question.title)},
@@ -68,9 +67,28 @@ async function main() {
                     ${sqlValueOrNull(question.language)},
                     ${sqlValueOrNull(`${question.context || ''}\n\n${question.alternativesIntroduction || ''}`.trim())},
                     ${sqlValueOrNull(JSON.stringify(question.files))},
-                    ${sqlValueOrNull(question.correctAlternative)},
-                    ${sqlValueOrNull(JSON.stringify(question.alternatives))}
+                    ${sqlValueOrNull(question.correctAlternative)}
                 );`.trim() + '\n\n');
+
+            stream.write('SET @last_question_id = LAST_INSERT_ID();\n\n');
+            
+            for (const alternative of question.alternatives) {
+                stream.write(`
+                    INSERT INTO enem_exams.alternatives (
+                        question_id,
+                        text,
+                        is_correct,
+                        file,
+                        letter
+                    ) 
+                    VALUES (
+                        @last_question_id,
+                        ${sqlValueOrNull(alternative.text)},
+                        ${alternative.isCorrect},
+                        ${sqlValueOrNull(alternative.file)},
+                        ${sqlValueOrNull(alternative.letter)}
+                    );`.trim() + '\n\n');
+            }
         }
     }
 
